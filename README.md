@@ -11,10 +11,12 @@ This sensor communicates using Universal Asynchronous Receiver/Transmitter. A UA
 
 Copy the all files from the source and include folders to your project and build it.
 
+The main.cpp source file contains a terminal program used to test the camera.
 The CameraMediator class contains all the business logic for the camera.
 
+## Status / Known bugs ##
 
-
+Can communicate with the camera although taking pictures has not been reliable so far.
 
 
 
