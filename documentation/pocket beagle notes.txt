@@ -1,0 +1,67 @@
+POCKETBEAGLE COMMANDS
+
+Note the following setup is assuming you are using https://debian.beagleboard.org/images/bone-debian-9.9-iot-armhf-2019-08-03-4gb.img.xz
+
+1. Connect to internet (https://ofitselfso.com/BeagleNotes/HowToConnectBeagleboneBlackToTheInternetViaUSB.php)
+	On windows machine in adapter settings
+		- Share connection with usb adapter (that is share the wifi go into wifi adaptor and Sharing tab)
+		- Set IP as automatic or 192.168.7.1, DNS as 8.8.8.8 on the Linux Adaptor
+		
+		
+	SSH to pocketbeagle 192.172.7.2 (debian/temppwd)
+		- sudo /sbin/route add default gw 192.168.7.1
+		- sudo nano /etc/resolv.conf   
+			--> append the following:
+				domain localdomain
+				search localdomain
+				nameserver 8.8.8.8
+				nameserver 8.8.4.4
+		- ping google.com 
+			--> should work
+			
+2. Update packages
+	- Get minicom package
+		apt-get update
+		sudo apt-get install minicom
+	
+3. Configure Serial Ports
+	- setup uEnv.txt
+		nano /boot/uEnv.txt 
+			--> edit the following
+			
+			uboot_overlay_addr0=/lib/firmware/BB-UART1-00A0.dtbo
+			uboot_overlay_addr1=/lib/firmware/BB-UART2-00A0.dtbo
+			uboot_overlay_addr2=/lib/firmware/BB-UART4-00A0.dtbo
+			uboot_overlay_addr3=/lib/firmware/BB-UART5-00A0.dtbo
+
+			--> add the following at the end of the filed
+
+			cape_disable=bone_capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN
+			cape_enable=bone_capemgr.enable_partno=BB-UART1,BB-UART2,BB-UART4,BB-UART5
+			
+4. Test serial ports (connect uart2 to uart4)
+		minicom -D /dev/ttyO2 -b 115200 --displayhex
+		minicom -D /dev/ttyO4 -b 115200 --displayhex
+		
+5. Allow root connection (for Eclipse setup remote run)
+     SSH and run the following command to be super user
+		sudo su
+	 Edit /etc/ssh/sshd_config
+		nano /etc/ssh/sshd_config
+	 --> uncomment the line and modify it to be the following: 
+		PermitRootLogin yes
+	 Restart ssh server:
+		service sshd restart
+	 Now you should be able to ssh with root/root
+------------------------------------------------------
+
+SETUP DEVELOPER ENVIRONMENT
+
+Follow this tutorial: http://jkuhlm.bplaced.net/hellobone/
+
+Used this file linaro release as the above tutorial doesn't point to the latest https://releases.linaro.org/components/toolchain/binaries/latest-7/arm-linux-gnueabihf/gcc-linaro-7.5.0-2019.12-i686-mingw32_arm-linux-gnueabihf.tar.xz
+
+Note for remote debugging it doesn't seem to work tried installing gdbserver on board but regardless there is dll issues on windows side
+	Linux commands:
+		dpkg -s gdbserver  
+		apt-get install gdbserver
