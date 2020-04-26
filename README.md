@@ -10,9 +10,13 @@ This sensor communicates using Universal Asynchronous Receiver/Transmitter. A UA
 The rest of the code has been created with inspiration from Adafruit's library:
 https://github.com/adafruit/Adafruit-VC0706-Serial-Camera-Library Especially the arduino example in it: https://github.com/adafruit/Adafruit-VC0706-Serial-Camera-Library/tree/master/examples/Snapshot
 
-## Status / Known bugs ##
+## Status / To do / Known bugs ##
 
-Can communicate with the camera although taking pictures has not been reliable so far.
+Can communicate with the camera and take pictures. 
+A patch is put in place as sometimes the amount of image size received is less than the size of the image so a few more lines are read until the JPG footer is found. 
+
+Other things to do: add functions get cameras current settings (resolution, compression); add function to put it in low power mode; add function for video out on/off.
+
 
 ## Using this library ##
 

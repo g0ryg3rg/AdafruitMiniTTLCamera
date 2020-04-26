@@ -1,5 +1,6 @@
 #include "camera_mediator.h"
-#include "uart.h"
+//#include "uart.h"
+#include "chronometer.h"
 #include <unistd.h>
 #include <string>
 #include <iostream>
@@ -33,7 +34,7 @@ int main(int argc, char **argv)
       break; //exit loop as nothing else to process
     }
   }
-  cout << "Baudrate set to " << baudrate << endl;
+  //cout << "Baudrate set to " << baudrate << endl;
   //cout << "Directory set to " << directory << endl;
   CameraMediator camera_mediator = CameraMediator(kCameraPort, baudrate);
 
@@ -79,29 +80,29 @@ int main(int argc, char **argv)
       output_file.clear(); //clear error flags
       output_file.open(output_file_name, ios::out | ios::trunc);
       timer.StartTimer();
-      for(unsigned i = 0; i < 100; i++)
-      {
+      //for(unsigned i = 0; i < 100; i++)
+      //{
         int return_value = camera_mediator.TakePicture(output_file);
-        if(return_value == -21 || return_value == -20)
-        {
+        //if(return_value == -21 || return_value == -20)
+        //{
           //file is closed and reopened with the truncate flag to discard bad data
-          output_file.close();
-          output_file.clear(); //clear error flags
-          output_file.open(output_file_name, ios::out | ios::trunc);
-          sleep(i);
-          continue;
-        }
-        else if(return_value < 0)
-        {
-          cout << "Another error; stopping attempts to take picture" << endl;
-          break;
-        }
-        else if(return_value == 0)
-        {
-          cout << "Took " << i << " attempts" << endl;
-          break;
-        }
-      }
+          //output_file.close();
+          //output_file.clear(); //clear error flags
+          //output_file.open(output_file_name, ios::out | ios::trunc);
+          //sleep(i);
+          //continue;
+        //}
+        //else if(return_value < 0)
+        //{
+        //  cout << "Another error; stopping attempts to take picture" << endl;
+          //break;
+        //}
+        //else if(return_value == 0)
+        //{
+          //cout << "Took " << i << " attempts" << endl;
+          //break;
+        //}
+      //}
       timer.StopTimer();
       cout << "Took " << timer.GetDurationMillisec() << " milliseconds" << endl;
       output_file.close();

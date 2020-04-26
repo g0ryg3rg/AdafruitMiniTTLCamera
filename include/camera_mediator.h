@@ -10,8 +10,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; version 3 of the License
 // 
-// 
-
+// Documentation:
+//    Camera Datasheet      https://cdn-shop.adafruit.com/product-files/1386/1386+v2+datasheet.pdf
+//    Camera Description    https://www.adafruit.com/product/1386
+//    Protocol Cheat Sheet  https://cdn-shop.adafruit.com/datasheets/VC0706protocol.pdf
+//    Adafruit Tutorial     https://learn.adafruit.com/ttl-serial-camera/
+//
 #pragma once
 
 #include "bbb_uart.h"
@@ -31,181 +35,158 @@ class CameraMediator
 {
 public:
 
-    CameraMediator(int port, int rate)
-        : uart_port_(port),
-          baud_rate_(rate),
-          serial_port_(port, rate, kUartDirection, false)
-    {
+  CameraMediator(int port, int rate)
+      : uart_port_(port),
+        baud_rate_(rate),
+        serial_port_(port, rate, kUartDirection, false)
+  {
 
-      input_buffer_length_ = 0;
-      frameptr = 0;
-    }
+    input_buffer_length_ = 0;
+    frameptr = 0;
+  }
 
-    // Initial operation process
+  // Initial operation process
 	//
-    //  （1） open port if not already opened before
-    //  （1） reset command
-    //  （2） set image resolution command
-    //  （3） set image compressibility command
+  //  （1） open port if not already opened before
+  //  （1） reset command
+  //  （2） set image resolution command
+  //  （3） set image compressibility command
 	//
 	// @return 0 if successful otherwise an error code usually -1 
-    int InitializationProcess();
+  int InitializationProcess();
 
-    // Image operation process 
+  // Image operation process
 	//
-    //    （1）capture a image command
-    //    （2）read image data length command
-    //    （3）read image data command
-    //    （4）stop capture command (resume video)
-	//
+  //    (1) capture a image command
+  //    (2) read image data length command
+  //    (3) read image data command
+  //    (4) stop capture command (resume video)
+  //
 	// @param output_file an open fstream to write to. It is expected that it is already open
 	// @return 0 if successful otherwise returns an error code usually -1
-    int TakePicture(std::fstream& output_file);
+  int TakePicture(std::fstream& output_file);
 
-    ////Basic Commands///////////////////////////////////
+  ////Basic Commands///////////////////////////////////
 
-    // @return 0 if successful otherwise returns an error code usually -1
-    int Initialize();
+  // @return 0 if successful otherwise returns an error code usually -1
+  int Initialize();
 
-    // @return true if successful otherwise false
-    bool Reset();
+  // @return true if successful otherwise false
+  bool Reset();
 
-    // @return true if successful otherwise false
-    bool SetImageSize(CameraResolution resolution);
+  // @return true if successful otherwise false
+  bool SetImageSize(CameraResolution resolution);
 
-    // @return true if successful otherwise false
-    bool SetImageCompression(uint8_t compression);
+  // @return true if successful otherwise false
+  bool SetImageCompression(uint8_t compression);
 
-    // @return true if successful otherwise false
-    bool CaptureImage();
+  // @return true if successful otherwise false
+  bool CaptureImage();
 
-    // @return true if successful otherwise false
-    bool ResumeVideo();
+  // @return true if successful otherwise false
+  bool ResumeVideo();
 
-	// @return size in bytes of the image taken if sucessful otherwise zero
-    uint32_t GetImageDataLength();
-	
-	// @param read_only when set to true only response is read (no command is sent)
-    // @return null pointer if failed to read data or if data is invalid
-    // @return otherwise returns pointer to image data
-    const uint8_t * ReadImageData(const uint8_t bytes_to_read, bool read_only);
+// @return size in bytes of the image taken if sucessful otherwise zero
+  uint32_t GetImageDataLength();
+
+// @param read_only when set to true only response is read (no command is sent)
+  // @return null pointer if failed to read data or if data is invalid
+  // @return otherwise returns pointer to image data
+  const uint8_t * ReadImageData(const uint8_t bytes_to_read);
 
 
-    //// Low level functions////////////////////////////////
+  //// Low level functions ////////////////////////////////
     
 	UART& GetSerialPort()
-    {
-      return serial_port_;
-    }
+  {
+    return serial_port_;
+  }
 
-    // @return 0 if successful otherwise returns an error code usually -1
-    int WriteByte(const char & input)
-    {
-      return serial_port_.uart_write(static_cast<const void*>(&input), 1);
-    }
+  // @return 0 if successful otherwise returns an error code usually -1
+  int WriteByte(const char & input)
+  {
+    return serial_port_.uart_write(static_cast<const void*>(&input), 1);
+  }
 
-    // @return 0 if successful otherwise returns an error code usually -1
-    int ReadByte(char& byteRead)
-    {
-      return serial_port_.uart_read(static_cast<void*>(&byteRead), 1);
-    }
+  // @return 0 if successful otherwise returns an error code usually -1
+  int ReadByte(char& byteRead)
+  {
+    return serial_port_.uart_read(static_cast<void*>(&byteRead), 1);
+  }
 
 private:
 
-    ////Command Constants/////////////////////////////////
-	
-    static const uint8_t kReset;
-    static const uint8_t kGenVersion;
-    static const uint8_t kSetPort;
-    static const uint8_t kReadFrameBuffer;
-    static const uint8_t kGetFrameBufferLength;
-    static const uint8_t kFrameBufferControl;
-    static const uint8_t kDownsizeCtrl;
-    static const uint8_t kDownsizeStatus;
-    static const uint8_t kReadData;
-    static const uint8_t kWriteData;
-    static const uint8_t kCommMotionCtrl;
-    static const uint8_t kCommMotionStatus;
-    static const uint8_t kCommMotionDetected;
-    static const uint8_t kMotionCtrl;
-    static const uint8_t kMotionStatus;
-    static const uint8_t kTvoutCtrl;
-    static const uint8_t kOsdAddChar;
+  //// Constants /////////////////////////////////
+  //// Commands /////////////////////////////////
+  static const uint8_t kCommandStart;
+  static const uint8_t kCommandAcknowledge;
+  static const uint8_t kReset;
+  static const uint8_t kGenVersion;
+  static const uint8_t kSetPort;
+  static const uint8_t kReadFrameBuffer;
+  static const uint8_t kGetFrameBufferLength;
+  static const uint8_t kFrameBufferControl;
+  static const uint8_t kDownsizeCtrl;
+  static const uint8_t kDownsizeStatus;
+  static const uint8_t kReadData;
+  static const uint8_t kWriteData;
+  static const uint8_t kCommMotionCtrl;
+  static const uint8_t kCommMotionStatus;
+  static const uint8_t kCommMotionDetected;
+  static const uint8_t kMotionCtrl;
+  static const uint8_t kMotionStatus;
+  static const uint8_t kTvoutCtrl;
+  static const uint8_t kOsdAddChar;
 
-    static const uint8_t kStopCurrentFrame;
-    static const uint8_t kStopNextFrame;
-    static const uint8_t kResumeFrame;
-    static const uint8_t kStepFrame;
+  static const uint8_t kStopCurrentFrame;
+  static const uint8_t kStopNextFrame;
+  static const uint8_t kResumeFrame;
+  static const uint8_t kStepFrame;
 
-    static const uint8_t kMotioncontrol;
-    static const uint8_t kUartmotion;
-    static const uint8_t kActivatemotion;
+  static const uint8_t kMotioncontrol;
+  static const uint8_t kUartmotion;
+  static const uint8_t kActivatemotion;
 
-    static const uint8_t kSetZoom;
-    static const uint8_t kGetZoom;
-	
-	////Serial port constants///////////////////////////////
-	
-    static const UART_TYPE kUartDirection;
+  static const uint8_t kSetZoom;
+  static const uint8_t kGetZoom;
 
-    //// Low level functions////////////////////////////////
+////Serial port constants///////////////////////////////
 
-	// @param flush_flag when set to true will erase data in serial ports input buffer before sending command
-	// @param wait_for_write when set to true will wait for command to be sent out before checking response from camera
-    bool RunCommand(const uint8_t cmd, const uint8_t *args, const uint8_t args_count, const uint8_t response_length, bool flush_flag = true, bool wait_for_write = false);
+  static const UART_TYPE kUartDirection;
 
-    // @return if command sent successfully returns the number of bytes written otherwise zero
-    int SendCommand(const uint8_t cmd, const uint8_t args[], const uint8_t args_count);
+  //// Low level functions////////////////////////////////
+
+  // @param flush_flag when set to true will erase data in serial ports input buffer before sending command
+  // @param wait_for_write when set to true will wait for command to be sent out before checking response from camera
+  bool RunCommand(const uint8_t cmd, const uint8_t *args, const uint8_t args_count, const uint8_t response_length, bool flush_flag = true, bool wait_for_write = false);
+
+  // @return if command sent successfully returns the number of bytes written otherwise zero
+  int SendCommand(const uint8_t cmd, const uint8_t args[], const uint8_t args_count);
 
 
-    // @input bytes_to_read: number of bytes to read
-    // @input timeout: timeout for each byte to read in miliseconds
-    // @return number of bytes read
-    int ReadResponse(const uint8_t bytes_to_read, const uint8_t timeout);
+  // @input bytes_to_read: number of bytes to read
+  // @input timeout: timeout for each byte to read in miliseconds
+  // @return number of bytes read
+  int ReadResponse(const uint8_t bytes_to_read, const uint8_t timeout);
 
-    
-    // @returns true if command is valid in input_buffer_[] otherwise returns false
-    bool VerifyResponse(const uint8_t command);
 
-    ///////////////////////////////////////////////
+  // @returns true if command is valid in input_buffer_[] otherwise returns false
+  bool VerifyResponse(const uint8_t command);
 
-    uint8_t  input_buffer_[CAMERABUFFSIZ]; //general buffer used for reading responses from camera
-    uint8_t  input_buffer_length_; //keeps track of size of input_buffer_[]
-    uint16_t frameptr; //used to keep track of what is the next index of the image that is being read from the camera
+  void PrintBuffer();
 
-    UART serial_port_;   //interface for serial port
-    int uart_port_;      //parameter to configure serial_port_: port number (setup specific)
-    int baud_rate_;      //parameter to configure serial_port_: port baudrate (typically 38400)
+  ///////////////////////////////////////////////
+
+  uint8_t  input_buffer_[CAMERABUFFSIZ]; //general buffer used for reading responses from camera
+  uint8_t  input_buffer_length_; //keeps track of size of input_buffer_[]
+  uint16_t frameptr; //used to keep track of what is the next index of the image that is being read from the camera
+
+  UART serial_port_;   //interface for serial port
+  int uart_port_;      //parameter to configure serial_port_: port number (setup specific)
+  int baud_rate_;      //parameter to configure serial_port_: port baudrate (typically 38400)
 
 };
 
-class Chronometer
-{
-
-public:
-  void StartTimer()
-  {
-    start_time_ = std::chrono::steady_clock::now();
-  }
-
-  void StopTimer()
-  {
-    stop_time_= std::chrono::steady_clock::now();
-  }
-
-//  std::chrono::duration<double, std::milli> GetDuration()
-//  {
-//    return stop_time_ - start_time_;
-//  }
-  double GetDurationMillisec()
-  {
-     std::chrono::duration<double, std::milli> duration_ms = stop_time_ - start_time_;
-     return duration_ms.count();
-  }
-private:
-  std::chrono::time_point<std::chrono::steady_clock> start_time_;
-  std::chrono::time_point<std::chrono::steady_clock> stop_time_;
-};
 
 //class CameraResponseSimulator
 //{
